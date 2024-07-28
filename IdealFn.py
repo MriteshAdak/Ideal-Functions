@@ -14,20 +14,20 @@ import pandas as pd
 import numpy as np
 from sqlalchemy import create_engine, Column, Float, String
 from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import column_property
 from sklearn.metrics import mean_squared_error
 import math
 import matplotlib.pyplot as plt
 
 
 def main():
-
 # Main function to run the data analysis framework.
 
 
     # Reads training, ideal, and test data from CSV files.
-    trainCSV = 'train.csv'
-    idealCSV = 'ideal.csv'
-    testCSV = 'test.csv'
+    trainCSV = './Datasets/train.csv'
+    idealCSV = './Datasets/ideal.csv'
+    testCSV = './Datasets/test.csv'
 
     # Identifies the ideal function for each training column.
     analysis = DataAnalysisOps(trainCSV, idealCSV, testCSV)
@@ -51,75 +51,40 @@ def main():
 Base = declarative_base()
 
 class TrainTable(Base):
-
 # Defining struture of the train data table to be stored in SQLAlchemy
 
     __tablename__ = 'Traning Data'
+
     x = Column(Float, primary_key=True)
-    y1 = Column(Float)
-    y2 = Column(Float)
-    y3 = Column(Float)
-    y4 = Column(Float)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        for i in range(1, 5):
+            setattr(self, f'y{i}', Column(Float))
+
+    @classmethod
+    def __declare_last__(cls):
+        for i in range(1, 5):
+            setattr(cls, f'y{i}', column_property(getattr(cls, f'y{i}')))
 
 class IdealFnTable(Base):
-
 # Defining struture of the Ideal functions table to be stored in SQLAlchemy
 
     __tablename__ = 'Ideal Functions'
+    
     x = Column(Float, primary_key=True)
-    y1 = Column(Float)
-    y2 = Column(Float)
-    y3 = Column(Float)
-    y4 = Column(Float)
-    y5 = Column(Float)
-    y6 = Column(Float)
-    y7 = Column(Float)
-    y8 = Column(Float)
-    y9 = Column(Float)
-    y10 = Column(Float)
-    y11 = Column(Float)
-    y12 = Column(Float)
-    y13 = Column(Float)
-    y14 = Column(Float)
-    y15 = Column(Float)
-    y16 = Column(Float)
-    y17 = Column(Float)
-    y18 = Column(Float)
-    y19 = Column(Float)
-    y20 = Column(Float)
-    y21 = Column(Float)
-    y22 = Column(Float)
-    y23 = Column(Float)
-    y24 = Column(Float)
-    y25 = Column(Float)
-    y26 = Column(Float)
-    y27 = Column(Float)
-    y28 = Column(Float)
-    y29 = Column(Float)
-    y30 = Column(Float)
-    y31 = Column(Float)
-    y32 = Column(Float)
-    y33 = Column(Float)
-    y34 = Column(Float)
-    y35 = Column(Float)
-    y36 = Column(Float)
-    y37 = Column(Float)
-    y38 = Column(Float)
-    y39 = Column(Float)
-    y40 = Column(Float)
-    y41 = Column(Float)
-    y42 = Column(Float)
-    y43 = Column(Float)
-    y44 = Column(Float)
-    y45 = Column(Float)
-    y46 = Column(Float)
-    y47 = Column(Float)
-    y48 = Column(Float)
-    y49 = Column(Float)
-    y50 = Column(Float)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        for i in range(1, 51):
+            setattr(self, f'y{i}', Column(Float))
+
+    @classmethod
+    def __declare_last__(cls):
+        for i in range(1, 51):
+            setattr(cls, f'y{i}', column_property(getattr(cls, f'y{i}')))
 
 class TestTable(Base):
-
 # Defining struture of the resultant mapped table to be stored in SQLAlchemy
 
     __tablename__ = 'Mapped Test Data'
@@ -129,8 +94,6 @@ class TestTable(Base):
     mapped_ideal_fn = Column(String)
 
 class DataAnalysisFramework:
-
-
 # Initializes the variables with the data to be processed. Loading data into the analytics system
 
     def __init__(self, trainCSV, idealCSV, testCSV) -> None:
@@ -149,7 +112,6 @@ class DataAnalysisFramework:
         self.testData = pd.read_csv(self.testCSV)
     
 class DataAnalysisOps(DataAnalysisFramework):
-
     """
     Data analysis operations class.
 
@@ -162,7 +124,6 @@ class DataAnalysisOps(DataAnalysisFramework):
         super().__init__(trainCSV, idealCSV, testCSV)
     
     def identify_ideal_fn(self) -> dict:
-
         # Identifies the ideal function for each training column.
         
         if self.trainingData is None:
@@ -185,7 +146,6 @@ class DataAnalysisOps(DataAnalysisFramework):
         return ideal_fn
     
     def calculate_maximum_deviation(self) -> dict:
-
         # Calculates the maximum deviation for each ideal function.
 
         max_deviations = {}
@@ -195,7 +155,6 @@ class DataAnalysisOps(DataAnalysisFramework):
         return max_deviations
     
     def mapping_with_test_data(self, ideal_fn:dict, max_deviations:dict) -> tuple[pd.DataFrame, pd.DataFrame]:
-
         # Maps the test data to the ideal functions.
 
         ideal_fn_cols = list(ideal_fn.values())
@@ -228,7 +187,6 @@ class DataAnalysisOps(DataAnalysisFramework):
         return mappedData, mergedData
     
     def create_nd_store_tables(self, mappedData:pd.DataFrame) -> None:
-
         # Creates SQLAlchemy tables for the training, ideal, and mapped test data
 
         try:
@@ -241,7 +199,6 @@ class DataAnalysisOps(DataAnalysisFramework):
             raise Exception("Error with DB operation.\nPlease check the following:\n1. Training and Ideal data is loaded\n2. Best ideal function mapping with Test data is complete")
 
     def plotting(self, mergedData:pd.DataFrame) -> None:
-
         # Plots the training data, raw test data, and mapped test data.
         
         for cols in self.trainingData.columns[1:]:
